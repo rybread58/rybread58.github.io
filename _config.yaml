@@ -1,1 +1,91 @@
+# =========================================
+# 🌱 Digital Garden Configuration
+# =========================================
+
+title: "Ryan's Garden"
+description: "A space for growing ideas, notes, and half-formed thoughts"
+baseurl: ""
+url: "https://rybread58.github.io"
+
+author:
+  name: "me"
+# email: "your@email.com"
+
+# =========================================
+# 🌿 Garden Philosophy
+# =========================================
+# Notes exist in various stages of growth:
+#   🌱 Seedling  — rough, barely developed
+#   🌿 Budding   — taking shape, still evolving
+#   🌳 Evergreen — stable, well-developed
+
+tagline: "Thinking out loud, in public"
+garden_start_date: "2026"
+
+# =========================================
+# Build Settings
+# =========================================
 theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-last-modified-at   # Useful for showing "last tended" dates
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# =========================================
+# 🗂️ Collections (Gardens use notes, not just posts)
+# =========================================
+collections:
+  notes:
+    output: true
+    permalink: /notes/:name/
+  essays:
+    output: true
+    permalink: /essays/:name/
+
+# =========================================
+# 📌 Defaults — growth stages & metadata
+# =========================================
+defaults:
+  - scope:
+      path: ""
+      type: "notes"
+    values:
+      layout: "note"
+      stage: "seedling"       # seedling | budding | evergreen
+      toc: false
+  - scope:
+      path: ""
+      type: "essays"
+    values:
+      layout: "essay"
+      stage: "evergreen"
+      toc: true
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+# =========================================
+# Permalinks & Structure
+# =========================================
+permalink: /:title/          # Clean URLs, no dates (gardens aren't chronological)
+
+# =========================================
+# Exclude
+# =========================================
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/
+  - .gitignore
+  - README.md
