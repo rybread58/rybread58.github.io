@@ -43,12 +43,15 @@ kramdown:
 # 🗂️ Collections (Gardens use notes, not just posts)
 # =========================================
 collections:
-  notes:
+  full-notes:
     output: true
-    permalink: /notes/:name/
-  essays:
+    permalink: /full-notes/:name/
+  growing-notes:
     output: true
-    permalink: /essays/:name/
+    permalink: /growing-notes/:name/
+  planted-notes:
+    output: true
+    permalink: /planted-notes/:name/
 
 # =========================================
 # 📌 Defaults — growth stages & metadata
