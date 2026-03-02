@@ -4,8 +4,8 @@
 
 title: "Ryan's Garden"
 description: "A space for growing ideas, notes, and half-formed thoughts"
-#baseurl: ""
-#url: "https://rybread58.github.io"
+baseurl: ""
+url: "https://rybread58.github.io"
 
 author:
   name: "me"
