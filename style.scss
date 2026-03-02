@@ -1,0 +1,64 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* ================================
+   Background & Base
+================================ */
+body {
+  background-color: #f5f0e8;        /* warm parchment feel */
+  font-family: Georgia, serif;       /* more garden-y than sans-serif */
+  color: #2c2c2c;
+  line-height: 1.8;
+}
+
+/* ================================
+   Interesting background options
+================================ */
+
+body {
+  background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+}
+
+
+/* ================================
+   Typography
+================================ */
+h1, h2, h3 {
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: 2em; }
+h2 { 
+  font-size: 1.4em;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.3em;
+}
+
+a {
+  color: #5a8a5a;                   /* muted green — fits garden theme */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+blockquote {
+  border-left: 3px solid #5a8a5a;
+  margin-left: 0;
+  padding-left: 1.2em;
+  color: #666;
+  font-style: italic;
+}
+
+/* ================================
+   Content width
+================================ */
+.wrapper {
+  max-width: 680px;                 /* readable line length */
+  margin: 0 auto;
+  padding: 2em 1.5em;
+}
