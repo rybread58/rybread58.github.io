@@ -1,97 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Josefin+Sans:wght@300;400;600&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+:root {
+  --purple: #6b4fa0;
+  --purple-light: #8a6bbf;
+  --purple-muted: #e8e0f5;
+  --ink: #1e1e1e;
+  --ink-muted: #666;
+  --ink-faint: #aaa;
+  --bg: #faf9f6;
+  --border: #e0dbd0;
+}
+
 body {
   display: flex;
   min-height: 100vh;
-  font-family: Georgia, serif;
-  background-color: #f5f0e8;
-  color: #2c2c2c;
+  font-family: 'EB Garamond', Georgia, serif;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-size: 18px;
 }
 
 /* ================================
-   Sidebar
+   Sidebar — primary
 ================================ */
 .sidebar {
-  width: 200px;
+  width: 180px;
   min-height: 100vh;
-  padding: 2em 1.5em;
-  border-right: 1px solid #ddd;
+  padding: 2.5em 1.5em 2em;
+  border-right: 1px solid var(--border);
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #f5f0e8;
+  background-color: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .sidebar-title a {
-  font-size: 0.85em;
-  font-weight: bold;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.75em;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #5a8a5a;
+  letter-spacing: 0.12em;
+  color: var(--purple);
   text-decoration: none;
   display: block;
-  margin-bottom: 2em;
+  margin-bottom: 2.5em;
+  line-height: 1.4;
+}
+
+.nav-section-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6em;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.7em;
+  margin-top: 1.8em;
 }
 
 .nav-links {
   list-style: none;
-  margin-bottom: 1.5em;
 }
 
 .nav-links li {
-  margin-bottom: 0.6em;
+  margin-bottom: 0.45em;
 }
 
 .nav-links a {
+  font-family: 'Josefin Sans', sans-serif;
   text-decoration: none;
-  font-size: 0.85em;
+  font-size: 0.72em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #2c2c2c;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  transition: color 0.15s ease;
 }
 
 .nav-links a:hover {
-  color: #5a8a5a;
+  color: var(--purple);
 }
 
-.nav-section-label {
-  font-size: 0.75em;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.8em;
-  margin-top: 1em;
+.nav-links a.active {
+  color: var(--purple);
 }
 
 /* ================================
    Main Content
 ================================ */
 .main-content {
-  margin-left: 200px;
-  padding: 3em 4em;
-  max-width: 740px;
+  margin-left: 180px;
+  padding: 4em 5em 6em;
+  max-width: 800px;
   line-height: 1.8;
+  width: 100%;
 }
 
-h1 { font-size: 1.8em; font-weight: normal; margin-bottom: 0.5em; }
-h2 { font-size: 1.3em; font-weight: normal; margin: 1.5em 0 0.5em; }
+/* ================================
+   Typography
+================================ */
+h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: 2em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.3em;
+  color: var(--ink);
+  line-height: 1.2;
+}
 
-a { color: #5a8a5a; }
+h2 {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--purple);
+  margin: 3em 0 1.2em;
+}
+
+h3 {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.15em;
+  font-weight: 500;
+  margin: 1.5em 0 0.3em;
+}
+
+p {
+  margin-bottom: 1.1em;
+  color: #333;
+}
+
+a {
+  color: var(--purple);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 blockquote {
-  border-left: 3px solid #5a8a5a;
-  padding-left: 1em;
-  color: #666;
+  border-left: 2px solid var(--purple-light);
+  padding: 0.3em 1.2em;
+  color: var(--ink-muted);
   font-style: italic;
-  margin: 1em 0;
+  margin: 1.5em 0;
+  background: var(--purple-muted);
+  border-radius: 0 4px 4px 0;
 }
 
 hr {
   border: none;
-  border-top: 1px solid #ddd;
-  margin: 2em 0;
+  border-top: 1px solid var(--border);
+  margin: 2.5em 0;
+}
+
+/* ================================
+   Note list (index pages)
+================================ */
+.note-list {
+  list-style: none;
+  margin-top: 1em;
+}
+
+.note-list li {
+  padding: 0.8em 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1em;
+}
+
+.note-list li:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.note-list .note-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05em;
+  color: var(--purple);
+}
+
+.note-list .note-title:hover {
+  color: var(--purple-light);
+}
+
+.note-list .note-desc {
+  font-size: 0.85em;
+  color: var(--ink-muted);
+  font-style: italic;
+  display: block;
+  margin-top: 0.1em;
+}
+
+.note-list .note-date {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.62em;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* ================================
+   Stage badge
+================================ */
+.stage-badge {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.2em 0.7em;
+  border-radius: 99px;
+  background: var(--purple-muted);
+  color: var(--purple);
+  vertical-align: middle;
+  margin-left: 0.5em;
+}
+
+/* ================================
+   Responsive
+================================ */
+@media (max-width: 700px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 1.5em;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1em;
+  }
+
+  .sidebar-title {
+    margin-bottom: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 2em 1.5em;
+  }
 }
