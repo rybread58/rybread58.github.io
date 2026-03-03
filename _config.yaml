@@ -25,9 +25,9 @@ garden_start_date: "2026"
 # =========================================
 # Build Settings
 # =========================================
-remote_theme: poole/hyde
+theme: jekyll-theme-hacker 
+
 plugins:
-  - jekyll-remote-theme
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
