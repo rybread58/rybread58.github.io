@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Growing Notes
+title: Full Notes
 permalink: /full-notes/
 ---
 
