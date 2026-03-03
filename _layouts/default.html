@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-title"><a href="/">{{ site.title }}</a></div>
+    <ul class="nav-links">
+      <li><a href="/planted-notes/">🌱 Planted</a></li>
+      <li><a href="/growing-notes/">🌿 Growing</a></li>
+      <li><a href="/full-notes/">🌳 Full Notes</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    {{ content }}
+  </main>
+</body>
+</html>
