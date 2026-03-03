@@ -25,12 +25,12 @@ garden_start_date: "2026"
 # =========================================
 # Build Settings
 # =========================================
-theme: poole/hyde
+remote_theme: poole/hyde
 plugins:
+  - jekyll-remote-theme
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
-  - jekyll-last-modified-at   # Useful for showing "last tended" dates
 
 markdown: kramdown
 highlighter: rouge
