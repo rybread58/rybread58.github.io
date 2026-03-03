@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Growing Notes
+title: Planted Notes
 permalink: /planted-notes/
 ---
 
