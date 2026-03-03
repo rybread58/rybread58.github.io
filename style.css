@@ -1,64 +1,97 @@
----
----
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-@import "{{ site.theme }}";
+body {
+  display: flex;
+  min-height: 100vh;
+  font-family: Georgia, serif;
+  background-color: #f5f0e8;
+  color: #2c2c2c;
+}
 
 /* ================================
-   Background & Base
+   Sidebar
 ================================ */
-body {
-  background-color: #f5f0e8;        /* warm parchment feel */
-  font-family: Georgia, serif;       /* more garden-y than sans-serif */
+.sidebar {
+  width: 200px;
+  min-height: 100vh;
+  padding: 2em 1.5em;
+  border-right: 1px solid #ddd;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #f5f0e8;
+}
+
+.sidebar-title a {
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5a8a5a;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 2em;
+}
+
+.nav-links {
+  list-style: none;
+  margin-bottom: 1.5em;
+}
+
+.nav-links li {
+  margin-bottom: 0.6em;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: #2c2c2c;
+}
+
+.nav-links a:hover {
+  color: #5a8a5a;
+}
+
+.nav-section-label {
+  font-size: 0.75em;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8em;
+  margin-top: 1em;
+}
+
+/* ================================
+   Main Content
+================================ */
+.main-content {
+  margin-left: 200px;
+  padding: 3em 4em;
+  max-width: 740px;
   line-height: 1.8;
 }
 
-/* ================================
-   Interesting background options
-================================ */
+h1 { font-size: 1.8em; font-weight: normal; margin-bottom: 0.5em; }
+h2 { font-size: 1.3em; font-weight: normal; margin: 1.5em 0 0.5em; }
 
-body {
-  background-image: url("https://www.transparenttextures.com/patterns/paper.png");
-}
-
-
-/* ================================
-   Typography
-================================ */
-h1, h2, h3 {
-  font-weight: normal;
-  letter-spacing: 0.02em;
-}
-
-h1 { font-size: 2em; }
-h2 { 
-  font-size: 1.4em;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 0.3em;
-}
-
-a {
-  color: #5a8a5a;                   /* muted green — fits garden theme */
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
+a { color: #5a8a5a; }
 
 blockquote {
   border-left: 3px solid #5a8a5a;
-  margin-left: 0;
-  padding-left: 1.2em;
+  padding-left: 1em;
   color: #666;
   font-style: italic;
+  margin: 1em 0;
 }
 
-/* ================================
-   Content width
-================================ */
-.wrapper {
-  max-width: 680px;                 /* readable line length */
-  margin: 0 auto;
-  padding: 2em 1.5em;
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 2em 0;
 }
