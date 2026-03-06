@@ -11,6 +11,18 @@ permalink: /graph/
   <title>Graph View — {{ site.title }}</title>
   <link rel="stylesheet" href="/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    #graph-container {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #graph-container svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
@@ -114,20 +126,19 @@ permalink: /graph/
       evergreen: '#9b6dff'
     };
 
-    // Wait for full page layout before initializing
-    window.addEventListener('load', () => {
+    function initGraph() {
       const container = document.getElementById('graph-container');
       const tooltip   = document.getElementById('tooltip');
+      const rect      = container.getBoundingClientRect();
+      const W         = rect.width;
+      const H         = rect.height;
 
-      // Use getBoundingClientRect for accurate post-layout dimensions
-      const rect = container.getBoundingClientRect();
-      const W = rect.width;
-      const H = rect.height;
-
+      // Create SVG with explicit pixel dimensions from live rect
       const svg = d3.select('#graph-container')
         .append('svg')
-        .attr('width', W)
-        .attr('height', H);
+        .style('width', W + 'px')
+        .style('height', H + 'px')
+        .style('display', 'block');
 
       const defs = svg.append('defs');
       const filter = defs.append('filter').attr('id', 'glow');
@@ -163,16 +174,17 @@ permalink: /graph/
 
           if (nodes.length === 0) {
             g.append('text')
-              .attr('x', W/2).attr('y', H/2)
+              .attr('x', 0).attr('y', 0)
               .attr('text-anchor', 'middle')
               .attr('fill', '#4a4a4a')
               .attr('font-family', 'Outfit, sans-serif')
               .attr('font-size', '14px')
               .text('No notes yet — add some to see the graph.');
+            svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
             return;
           }
 
-          // Pre-position nodes so they aren't all at 0,0
+          // Pre-position nodes
           nodes.forEach((node, i) => {
             const angle = (i / nodes.length) * 2 * Math.PI;
             const radius = nodes.length === 1 ? 0 : 150;
@@ -180,7 +192,6 @@ permalink: /graph/
             node.y = Math.sin(angle) * radius;
           });
 
-          // Fix single node at center
           if (nodes.length === 1) {
             nodes[0].fx = 0;
             nodes[0].fy = 0;
@@ -191,9 +202,8 @@ permalink: /graph/
             .force('charge', d3.forceManyBody().strength(-250))
             .force('center', d3.forceCenter(0, 0))
             .force('collision', d3.forceCollide(24))
-            .stop(); // don't auto-start yet
+            .stop();
 
-          // Run ticks synchronously so positions are ready before render
           simulation.tick(300);
 
           const link = g.append('g')
@@ -263,7 +273,6 @@ permalink: /graph/
               .text('add more notes to see connections grow');
           }
 
-          // Now restart simulation for live interaction
           simulation.on('tick', () => {
             link
               .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
@@ -273,10 +282,18 @@ permalink: /graph/
           });
           simulation.alphaTarget(0).restart();
 
-          // Center the view
           svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
         })
         .catch(err => console.error('Graph load error:', err));
+    }
+
+    // Use requestAnimationFrame to ensure layout is fully painted
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          initGraph();
+        });
+      });
     });
   </script>
 
