@@ -39,7 +39,7 @@ permalink: /graph/
       </div>
       <div class="folder-children" id="planted-children">
         {% for note in site.planted-notes %}
-          {% unless note.path contains 'placeholder' %}
+          {% unless note.path contains 'place' %}
           <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
           {% endunless %}
         {% endfor %}
@@ -50,7 +50,7 @@ permalink: /graph/
       </div>
       <div class="folder-children" id="growing-children">
         {% for note in site.growing-notes %}
-          {% unless note.path contains 'placeholder' %}
+          {% unless note.path contains 'place' %}
           <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
           {% endunless %}
         {% endfor %}
@@ -61,7 +61,7 @@ permalink: /graph/
       </div>
       <div class="folder-children" id="full-children">
         {% for note in site.full-notes %}
-          {% unless note.path contains 'placeholder' %}
+          {% unless note.path contains 'place' %}
           <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
           {% endunless %}
         {% endfor %}
@@ -107,11 +107,10 @@ permalink: /graph/
       }
     });
 
-    // ── D3 Graph ──────────────────────────────────────────
     const stageColor = {
-      planted: '#4a9b6d',
-      growing: '#c49a3c',
-      full:    '#9b6dff',
+      planted:   '#4a9b6d',
+      growing:   '#c49a3c',
+      full:      '#9b6dff',
       evergreen: '#9b6dff'
     };
 
@@ -135,36 +134,52 @@ permalink: /graph/
 
     const g = svg.append('g');
 
-    // Zoom
     const zoom = d3.zoom()
       .scaleExtent([0.2, 4])
       .on('zoom', e => g.attr('transform', e.transform));
     svg.call(zoom);
 
-    document.getElementById('zoom-in').onclick  = () => svg.transition().call(zoom.scaleBy, 1.4);
-    document.getElementById('zoom-out').onclick = () => svg.transition().call(zoom.scaleBy, 0.7);
+    document.getElementById('zoom-in').onclick    = () => svg.transition().call(zoom.scaleBy, 1.4);
+    document.getElementById('zoom-out').onclick   = () => svg.transition().call(zoom.scaleBy, 0.7);
     document.getElementById('zoom-reset').onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
 
     fetch('/graph.json')
       .then(r => r.json())
       .then(data => {
-        // Filter placeholder
-        const nodes = data.nodes.filter(n => n.id !== '__placeholder__');
+        // Filter out placeholders and nodes with empty IDs
+        const nodes = data.nodes.filter(n =>
+          n.id &&
+          n.id !== '__placeholder__' &&
+          !n.id.includes('placeholder')
+        );
+
         const nodeIds = new Set(nodes.map(n => n.id));
+
         const links = data.links.filter(l =>
           l.source !== '__placeholder__' &&
           l.target !== '__placeholder__' &&
-          nodeIds.has(l.source) &&
-          nodeIds.has(l.target)
+          nodeIds.has(typeof l.source === 'object' ? l.source.id : l.source) &&
+          nodeIds.has(typeof l.target === 'object' ? l.target.id : l.target)
         );
 
-        const simulation = d3.forceSimulation(nodes)
-          .force('link', d3.forceLink(links).id(d => d.id).distance(90))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('center', d3.forceCenter(0, 0))
-          .force('collision', d3.forceCollide(20));
+        if (nodes.length === 0) {
+          g.append('text')
+            .attr('x', 0).attr('y', 0)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#4a4a4a')
+            .attr('font-family', 'Outfit, sans-serif')
+            .attr('font-size', '14px')
+            .text('No notes yet — add some to see the graph.');
+          svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
+          return;
+        }
 
-        // Links
+        const simulation = d3.forceSimulation(nodes)
+          .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+          .force('charge', d3.forceManyBody().strength(-250))
+          .force('center', d3.forceCenter(0, 0))
+          .force('collision', d3.forceCollide(24));
+
         const link = g.append('g')
           .selectAll('line')
           .data(links)
@@ -173,12 +188,11 @@ permalink: /graph/
           .attr('stroke-width', 1.5)
           .attr('stroke-opacity', 0.6);
 
-        // Nodes
         const node = g.append('g')
           .selectAll('circle')
           .data(nodes)
           .join('circle')
-          .attr('r', 7)
+          .attr('r', 8)
           .attr('fill', d => stageColor[d.stage] || '#6b4fa0')
           .attr('filter', 'url(#glow)')
           .attr('stroke', '#0d0d0d')
@@ -192,10 +206,7 @@ permalink: /graph/
           .on('mouseover', (e, d) => {
             tooltip.style.opacity = '1';
             tooltip.textContent = d.title;
-            d3.select(e.currentTarget)
-              .transition().duration(150)
-              .attr('r', 10)
-              .attr('fill', '#c09fff');
+            d3.select(e.currentTarget).transition().duration(150).attr('r', 12).attr('fill', '#c09fff');
           })
           .on('mousemove', e => {
             tooltip.style.left = (e.clientX + 14) + 'px';
@@ -203,14 +214,10 @@ permalink: /graph/
           })
           .on('mouseout', (e, d) => {
             tooltip.style.opacity = '0';
-            d3.select(e.currentTarget)
-              .transition().duration(150)
-              .attr('r', 7)
-              .attr('fill', stageColor[d.stage] || '#6b4fa0');
+            d3.select(e.currentTarget).transition().duration(150).attr('r', 8).attr('fill', stageColor[d.stage] || '#6b4fa0');
           })
           .on('click', (e, d) => { window.location.href = d.url; });
 
-        // Labels
         const label = g.append('g')
           .selectAll('text')
           .data(nodes)
@@ -220,7 +227,7 @@ permalink: /graph/
           .attr('font-size', '11px')
           .attr('fill', '#8a8a8a')
           .attr('text-anchor', 'middle')
-          .attr('dy', '1.8em')
+          .attr('dy', '2em')
           .style('pointer-events', 'none')
           .style('user-select', 'none');
 
@@ -232,9 +239,9 @@ permalink: /graph/
           label.attr('x', d => d.x).attr('y', d => d.y);
         });
 
-        // Center on load
         svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
-      });
+      })
+      .catch(err => console.error('Graph load error:', err));
   </script>
 
 </body>
