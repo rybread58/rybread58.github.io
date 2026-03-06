@@ -2,20 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title | default: site.title }}</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
   <nav class="sidebar">
-    <div class="sidebar-title"><a href="/">{{ site.title }}</a></div>
-    <ul class="nav-links">
-      <li><a href="/planted-notes/">🌱 Planted</a></li>
-      <li><a href="/growing-notes/">🌿 Growing</a></li>
-      <li><a href="/full-notes/">🌳 Full Notes</a></li>
-    </ul>
+    <div class="sidebar-header">
+      <div class="sidebar-title"><a href="/">{{ site.title }}</a></div>
+      <div class="sidebar-tagline">{{ site.tagline }}</div>
+    </div>
+
+    <div class="sidebar-section">
+      <ul class="nav-links">
+        <li><a href="/" class="{% if page.url == '/' %}active{% endif %}">
+          <span class="nav-icon">⌂</span> Home
+        </a></li>
+        <li><a href="/graph/" class="{% if page.url == '/graph/' %}active{% endif %}">
+          <span class="nav-icon">◈</span> Graph View
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="nav-section-label">Garden</div>
+
+      <!-- 🌱 Planted -->
+      <div class="folder-item" onclick="toggleFolder('planted')">
+        <span class="folder-icon" id="planted-arrow">▶</span>
+        <span>🌱 Planted</span>
+      </div>
+      <div class="folder-children" id="planted-children">
+        {% for note in site.planted-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}">
+            <span style="color:var(--text-faint); font-size:0.8em;">📄</span>
+            {{ note.title }}
+          </a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+
+      <!-- 🌿 Growing -->
+      <div class="folder-item" onclick="toggleFolder('growing')">
+        <span class="folder-icon" id="growing-arrow">▶</span>
+        <span>🌿 Growing</span>
+      </div>
+      <div class="folder-children" id="growing-children">
+        {% for note in site.growing-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}">
+            <span style="color:var(--text-faint); font-size:0.8em;">📄</span>
+            {{ note.title }}
+          </a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+
+      <!-- 🌳 Full Notes -->
+      <div class="folder-item" onclick="toggleFolder('full')">
+        <span class="folder-icon" id="full-arrow">▶</span>
+        <span>🌳 Full Notes</span>
+      </div>
+      <div class="folder-children" id="full-children">
+        {% for note in site.full-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}">
+            <span style="color:var(--text-faint); font-size:0.8em;">📄</span>
+            {{ note.title }}
+          </a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+    </div>
   </nav>
+
   <main class="main-content">
     {{ content }}
   </main>
+
+  <script>
+    function toggleFolder(name) {
+      const children = document.getElementById(name + '-children');
+      const arrow = document.getElementById(name + '-arrow');
+      const isOpen = children.classList.toggle('open');
+      arrow.textContent = isOpen ? '▼' : '▶';
+      // persist state
+      localStorage.setItem('folder-' + name, isOpen ? 'open' : 'closed');
+    }
+
+    // Restore folder states on load
+    ['planted', 'growing', 'full'].forEach(name => {
+      const state = localStorage.getItem('folder-' + name);
+      if (state === 'open') {
+        document.getElementById(name + '-children').classList.add('open');
+        document.getElementById(name + '-arrow').textContent = '▼';
+      }
+    });
+
+    // Mark active note link
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.folder-children a').forEach(link => {
+      if (link.getAttribute('href') === currentPath) {
+        link.style.color = 'var(--purple)';
+        link.style.borderLeftColor = 'var(--purple)';
+        // Auto-open parent folder
+        const parent = link.closest('.folder-children');
+        if (parent) {
+          parent.classList.add('open');
+          const id = parent.id.replace('-children', '-arrow');
+          document.getElementById(id).textContent = '▼';
+        }
+      }
+    });
+  </script>
+
 </body>
 </html>
