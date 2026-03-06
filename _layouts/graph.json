@@ -1,0 +1,33 @@
+---
+layout: none
+permalink: /graph.json
+---
+{
+  "nodes": [
+    {% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
+    {% assign total = all_notes | size %}
+    {% assign i = 0 %}
+    {% for note in all_notes %}
+      {% unless note.path contains 'placeholder' %}
+      {
+        "id": "{{ note.slug | default: note.name }}",
+        "title": {{ note.title | jsonify }},
+        "url": "{{ note.url }}",
+        "stage": "{{ note.stage | default: 'planted' }}"
+      }{% unless forloop.last %},{% endunless %}
+      {% endunless %}
+    {% endfor %}
+  ],
+  "links": [
+    {% for note in all_notes %}
+      {% unless note.path contains 'placeholder' %}
+        {% if note.links %}
+          {% for link in note.links %}
+            { "source": "{{ note.slug | default: note.name }}", "target": "{{ link }}" },
+          {% endfor %}
+        {% endif %}
+      {% endunless %}
+    {% endfor %}
+    {"source":"__placeholder__","target":"__placeholder__"}
+  ]
+}
