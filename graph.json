@@ -10,7 +10,7 @@ permalink: /graph.json
     {% for note in all_notes %}
       {% unless note.path contains 'placeholder' %}
       {
-        "id": "{{ note.slug | default: note.name }}",
+        "id": "{{ note.url | slugify }}",,
         "title": {{ note.title | jsonify }},
         "url": "{{ note.url }}",
         "stage": "{{ note.stage | default: 'planted' }}"
