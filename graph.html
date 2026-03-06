@@ -1,0 +1,241 @@
+---
+layout: none
+title: Graph View
+permalink: /graph/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph View — {{ site.title }}</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title"><a href="/">{{ site.title }}</a></div>
+      <div class="sidebar-tagline">{{ site.tagline }}</div>
+    </div>
+
+    <div class="sidebar-section">
+      <ul class="nav-links">
+        <li><a href="/">
+          <span class="nav-icon">⌂</span> Home
+        </a></li>
+        <li><a href="/graph/" class="active">
+          <span class="nav-icon">◈</span> Graph View
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="nav-section-label">Garden</div>
+      <div class="folder-item" onclick="toggleFolder('planted')">
+        <span class="folder-icon" id="planted-arrow">▶</span>
+        <span>🌱 Planted</span>
+      </div>
+      <div class="folder-children" id="planted-children">
+        {% for note in site.planted-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+      <div class="folder-item" onclick="toggleFolder('growing')">
+        <span class="folder-icon" id="growing-arrow">▶</span>
+        <span>🌿 Growing</span>
+      </div>
+      <div class="folder-children" id="growing-children">
+        {% for note in site.growing-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+      <div class="folder-item" onclick="toggleFolder('full')">
+        <span class="folder-icon" id="full-arrow">▶</span>
+        <span>🌳 Full Notes</span>
+      </div>
+      <div class="folder-children" id="full-children">
+        {% for note in site.full-notes %}
+          {% unless note.path contains 'placeholder' %}
+          <a href="{{ note.url }}"><span style="color:var(--text-faint);font-size:0.8em">📄</span> {{ note.title }}</a>
+          {% endunless %}
+        {% endfor %}
+      </div>
+    </div>
+  </nav>
+
+  <div class="graph-page">
+    <div id="graph-container"></div>
+    <div class="graph-tooltip" id="tooltip"></div>
+
+    <div class="graph-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#4a9b6d"></div> Planted
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#c49a3c"></div> Growing
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#9b6dff"></div> Full
+      </div>
+    </div>
+
+    <div class="graph-controls">
+      <button id="zoom-in" title="Zoom in">+</button>
+      <button id="zoom-out" title="Zoom out">−</button>
+      <button id="zoom-reset" title="Reset view">⊙</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleFolder(name) {
+      const children = document.getElementById(name + '-children');
+      const arrow = document.getElementById(name + '-arrow');
+      const isOpen = children.classList.toggle('open');
+      arrow.textContent = isOpen ? '▼' : '▶';
+      localStorage.setItem('folder-' + name, isOpen ? 'open' : 'closed');
+    }
+    ['planted', 'growing', 'full'].forEach(name => {
+      if (localStorage.getItem('folder-' + name) === 'open') {
+        document.getElementById(name + '-children').classList.add('open');
+        document.getElementById(name + '-arrow').textContent = '▼';
+      }
+    });
+
+    // ── D3 Graph ──────────────────────────────────────────
+    const stageColor = {
+      planted: '#4a9b6d',
+      growing: '#c49a3c',
+      full:    '#9b6dff',
+      evergreen: '#9b6dff'
+    };
+
+    const container = document.getElementById('graph-container');
+    const tooltip   = document.getElementById('tooltip');
+    const W = container.offsetWidth;
+    const H = container.offsetHeight;
+
+    const svg = d3.select('#graph-container')
+      .append('svg')
+      .attr('width', W)
+      .attr('height', H);
+
+    // Glow filter
+    const defs = svg.append('defs');
+    const filter = defs.append('filter').attr('id', 'glow');
+    filter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'coloredBlur');
+    const feMerge = filter.append('feMerge');
+    feMerge.append('feMergeNode').attr('in', 'coloredBlur');
+    feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+    const g = svg.append('g');
+
+    // Zoom
+    const zoom = d3.zoom()
+      .scaleExtent([0.2, 4])
+      .on('zoom', e => g.attr('transform', e.transform));
+    svg.call(zoom);
+
+    document.getElementById('zoom-in').onclick  = () => svg.transition().call(zoom.scaleBy, 1.4);
+    document.getElementById('zoom-out').onclick = () => svg.transition().call(zoom.scaleBy, 0.7);
+    document.getElementById('zoom-reset').onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
+
+    fetch('/graph.json')
+      .then(r => r.json())
+      .then(data => {
+        // Filter placeholder
+        const nodes = data.nodes.filter(n => n.id !== '__placeholder__');
+        const nodeIds = new Set(nodes.map(n => n.id));
+        const links = data.links.filter(l =>
+          l.source !== '__placeholder__' &&
+          l.target !== '__placeholder__' &&
+          nodeIds.has(l.source) &&
+          nodeIds.has(l.target)
+        );
+
+        const simulation = d3.forceSimulation(nodes)
+          .force('link', d3.forceLink(links).id(d => d.id).distance(90))
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('center', d3.forceCenter(0, 0))
+          .force('collision', d3.forceCollide(20));
+
+        // Links
+        const link = g.append('g')
+          .selectAll('line')
+          .data(links)
+          .join('line')
+          .attr('stroke', '#2a2a2a')
+          .attr('stroke-width', 1.5)
+          .attr('stroke-opacity', 0.6);
+
+        // Nodes
+        const node = g.append('g')
+          .selectAll('circle')
+          .data(nodes)
+          .join('circle')
+          .attr('r', 7)
+          .attr('fill', d => stageColor[d.stage] || '#6b4fa0')
+          .attr('filter', 'url(#glow)')
+          .attr('stroke', '#0d0d0d')
+          .attr('stroke-width', 1.5)
+          .style('cursor', 'pointer')
+          .call(d3.drag()
+            .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+            .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+            .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+          )
+          .on('mouseover', (e, d) => {
+            tooltip.style.opacity = '1';
+            tooltip.textContent = d.title;
+            d3.select(e.currentTarget)
+              .transition().duration(150)
+              .attr('r', 10)
+              .attr('fill', '#c09fff');
+          })
+          .on('mousemove', e => {
+            tooltip.style.left = (e.clientX + 14) + 'px';
+            tooltip.style.top  = (e.clientY - 10) + 'px';
+          })
+          .on('mouseout', (e, d) => {
+            tooltip.style.opacity = '0';
+            d3.select(e.currentTarget)
+              .transition().duration(150)
+              .attr('r', 7)
+              .attr('fill', stageColor[d.stage] || '#6b4fa0');
+          })
+          .on('click', (e, d) => { window.location.href = d.url; });
+
+        // Labels
+        const label = g.append('g')
+          .selectAll('text')
+          .data(nodes)
+          .join('text')
+          .text(d => d.title)
+          .attr('font-family', 'Outfit, sans-serif')
+          .attr('font-size', '11px')
+          .attr('fill', '#8a8a8a')
+          .attr('text-anchor', 'middle')
+          .attr('dy', '1.8em')
+          .style('pointer-events', 'none')
+          .style('user-select', 'none');
+
+        simulation.on('tick', () => {
+          link
+            .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+          node.attr('cx', d => d.x).attr('cy', d => d.y);
+          label.attr('x', d => d.x).attr('y', d => d.y);
+        });
+
+        // Center on load
+        svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
+      });
+  </script>
+
+</body>
+</html>
