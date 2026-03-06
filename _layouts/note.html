@@ -1,5 +1,55 @@
 ---
 layout: default
 ---
+
+<div class="note-stage">
+  <span class="stage-dot" style="background: {% if page.stage == 'planted' %}#4a9b6d{% elsif page.stage == 'growing' %}#c49a3c{% else %}#9b6dff{% endif %}"></span>
+  {% if page.stage == 'planted' %}🌱 Planted{% elsif page.stage == 'growing' %}🌿 Growing{% else %}🌳 Full Note{% endif %}
+  {% if page.date %}&nbsp;·&nbsp; {{ page.date | date: "%b %d, %Y" }}{% endif %}
+</div>
+
 <h1>{{ page.title }}</h1>
+
+{% if page.description %}
+<p style="color: var(--text-muted); font-style: italic; margin-top: -0.4em; margin-bottom: 1.8em; font-size: 0.9em;">{{ page.description }}</p>
+{% endif %}
+
 {{ content }}
+
+{% if page.links %}
+<hr>
+<p style="font-family: var(--font-ui); font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint);">Connects to</p>
+<div style="display: flex; flex-wrap: wrap; gap: 0.5em; margin-top: 0.6em;">
+  {% for link in page.links %}
+    {% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
+    {% for note in all_notes %}
+      {% if note.slug == link or note.name == link %}
+        <a href="{{ note.url }}" class="backlinks-list" style="font-family: var(--font-ui); font-size: 0.75em; padding: 0.3em 0.8em; background: var(--bg-tertiary); border: 1px solid var(--border-bright); border-radius: 4px; color: var(--text-muted);">
+          → {{ note.title }}
+        </a>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Backlinks: notes that link TO this page -->
+{% assign current_slug = page.slug | default: page.name %}
+{% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
+{% assign backlink_notes = "" | split: "" %}
+{% for note in all_notes %}
+  {% if note.links contains current_slug %}
+    {% assign backlink_notes = backlink_notes | push: note %}
+  {% endif %}
+{% endfor %}
+
+{% if backlink_notes.size > 0 %}
+<div class="backlinks-panel">
+  <div class="backlinks-title">← Linked here from</div>
+  <ul class="backlinks-list">
+    {% for note in backlink_notes %}
+      <li><a href="{{ note.url }}">{{ note.title }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
