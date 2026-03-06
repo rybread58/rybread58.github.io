@@ -124,7 +124,6 @@ permalink: /graph/
       .attr('width', W)
       .attr('height', H);
 
-    // Glow filter
     const defs = svg.append('defs');
     const filter = defs.append('filter').attr('id', 'glow');
     filter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'coloredBlur');
@@ -146,15 +145,10 @@ permalink: /graph/
     fetch('/graph.json')
       .then(r => r.json())
       .then(data => {
-        // Filter out placeholders and nodes with empty IDs
         const nodes = data.nodes.filter(n =>
-          n.id &&
-          n.id !== '__placeholder__' &&
-          !n.id.includes('placeholder')
+          n.id && n.id !== '__placeholder__' && !n.id.includes('placeholder')
         );
-
         const nodeIds = new Set(nodes.map(n => n.id));
-
         const links = data.links.filter(l =>
           l.source !== '__placeholder__' &&
           l.target !== '__placeholder__' &&
@@ -172,6 +166,20 @@ permalink: /graph/
             .text('No notes yet — add some to see the graph.');
           svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
           return;
+        }
+
+        // Pin nodes to starting positions so single nodes don't get lost
+        nodes.forEach((node, i) => {
+          const angle = (i / nodes.length) * 2 * Math.PI;
+          const radius = nodes.length === 1 ? 0 : 120;
+          node.x = Math.cos(angle) * radius;
+          node.y = Math.sin(angle) * radius;
+        });
+
+        // For a single node, fix it at center
+        if (nodes.length === 1) {
+          nodes[0].fx = 0;
+          nodes[0].fy = 0;
         }
 
         const simulation = d3.forceSimulation(nodes)
@@ -201,7 +209,7 @@ permalink: /graph/
           .call(d3.drag()
             .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
             .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
-            .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+            .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); if (nodes.length > 1) { d.fx = null; d.fy = null; } })
           )
           .on('mouseover', (e, d) => {
             tooltip.style.opacity = '1';
@@ -231,6 +239,18 @@ permalink: /graph/
           .style('pointer-events', 'none')
           .style('user-select', 'none');
 
+        // Hint text when only one note exists
+        if (nodes.length === 1) {
+          g.append('text')
+            .attr('x', 0)
+            .attr('y', 40)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#3a3a3a')
+            .attr('font-family', 'Outfit, sans-serif')
+            .attr('font-size', '11px')
+            .text('add more notes to see connections grow');
+        }
+
         simulation.on('tick', () => {
           link
             .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
@@ -238,6 +258,10 @@ permalink: /graph/
           node.attr('cx', d => d.x).attr('cy', d => d.y);
           label.attr('x', d => d.x).attr('y', d => d.y);
         });
+
+        // Run simulation a few ticks before rendering to settle positions
+        simulation.tick(50);
+        simulation.on('tick')();
 
         svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2));
       })
