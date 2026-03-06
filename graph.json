@@ -5,25 +5,25 @@ permalink: /graph.json
 {
   "nodes": [
     {% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
-    {% assign total = all_notes | size %}
-    {% assign i = 0 %}
+    {% assign first = true %}
     {% for note in all_notes %}
-      {% unless note.path contains 'placeholder' %}
+      {% unless note.path contains 'place' %}
+      {% unless first == false %}{% assign first = false %}{% else %},{% endunless %}
       {
-        "id": "{{ note.url | slugify }}",,
+        "id": "{{ note.url }}",
         "title": {{ note.title | jsonify }},
         "url": "{{ note.url }}",
         "stage": "{{ note.stage | default: 'planted' }}"
-      }{% unless forloop.last %},{% endunless %}
+      }
       {% endunless %}
     {% endfor %}
   ],
   "links": [
     {% for note in all_notes %}
-      {% unless note.path contains 'placeholder' %}
+      {% unless note.path contains 'place' %}
         {% if note.links %}
           {% for link in note.links %}
-            { "source": "{{ note.slug | default: note.name }}", "target": "{{ link }}" },
+            { "source": "{{ note.url }}", "target": "/{{ link }}/" },
           {% endfor %}
         {% endif %}
       {% endunless %}
