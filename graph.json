@@ -2,32 +2,40 @@
 layout: none
 permalink: /graph.json
 ---
+{% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
 {
   "nodes": [
-    {% assign all_notes = site.planted-notes | concat: site.growing-notes | concat: site.full-notes %}
-    {% assign first = true %}
+    {% assign first_node = true %}
     {% for note in all_notes %}
       {% unless note.path contains 'place' %}
-      {% unless first == false %}{% assign first = false %}{% else %},{% endunless %}
-      {
-        "id": "{{ note.url }}",
-        "title": {{ note.title | jsonify }},
-        "url": "{{ note.url }}",
-        "stage": "{{ note.stage | default: 'planted' }}"
-      }
+        {% unless first_node %},{% endunless %}
+        {% assign first_node = false %}
+        {
+          "id": "{{ note.url }}",
+          "title": {{ note.title | jsonify }},
+          "url": "{{ note.url }}",
+          "stage": "{{ note.stage | default: 'planted' }}"
+        }
       {% endunless %}
     {% endfor %}
   ],
   "links": [
+    {% assign first_link = true %}
     {% for note in all_notes %}
       {% unless note.path contains 'place' %}
         {% if note.links %}
           {% for link in note.links %}
-            { "source": "{{ note.url }}", "target": "/{{ link }}/" },
+            {% for target_note in all_notes %}
+              {% assign target_filename = target_note.path | split: '/' | last | replace: '.md', '' %}
+              {% if target_filename == link %}
+                {% unless first_link %},{% endunless %}
+                {% assign first_link = false %}
+                { "source": "{{ note.url }}", "target": "{{ target_note.url }}" }
+              {% endif %}
+            {% endfor %}
           {% endfor %}
         {% endif %}
       {% endunless %}
     {% endfor %}
-    {"source":"__placeholder__","target":"__placeholder__"}
   ]
 }
